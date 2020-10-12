@@ -1,0 +1,171 @@
+correo carlos kevops carloszrm90@gmail.com
+
+JENKINS_CONTAINER=jenkins-server
+
+mkdir -p /var/containers/$JENKINS_CONTAINER/var/jenkins_home
+chown 1000:1000 -R /var/containers/$JENKINS_CONTAINER
+
+docker run -itd --name $JENKINS_CONTAINER \
+    --restart always \
+    -p 8080:8080 \
+    -p 50000:50000 \
+    -v /etc/localtime:/etc/localtime:ro \
+    -v /usr/share/zoneinfo:/usr/share/zoneinfo:ro \
+    -v /var/containers/$JENKINS_CONTAINER/var/jenkins_home:/var/jenkins_home:z \
+    -e TZ=America/Mexico_City \
+    jenkins/jenkins:lts
+
+
+
+------------------
+docker exec -it jenkins-server bash
+
+cat /var/jenkins_home/secrets/initialAdminPassword
+
+
+---------------------
+
+ejemplo: 
+pipeline{
+    agent any 
+    stages
+    {
+        stage('Instalar librerias')
+        {
+            steps
+            {
+                script{
+                    echo "Libreria 1"
+                }
+            }
+            post{
+                success{
+                    echo  "always, success, failure, unstable "
+                    echo "Succes. Las  librerias se descargaron"
+                }
+            }
+        }
+        stage('Stage B')
+        {
+            steps
+            {
+                script{
+                    echo "Stage B"
+                }
+                retry(5)
+                {
+                    sh '''
+                    
+                    exit 1
+                    
+                    '''
+                }
+                script{
+                   echo "Stage B" 
+                }
+            }
+        }
+    }
+    post{
+        always 
+        {
+            echo 'This will always run'
+        }
+        success 
+        {
+            echo 'This will run only if successful'
+        }
+        failure {
+            echo 'This will run only if failed'
+        }   
+    }
+}
+
+---------------------------
+
+pipeline{
+    agent any
+
+    stages
+    {
+        stage('Instalar librerias')
+        {
+            steps
+            {
+                script{
+                    echo "Libreria 1"
+                }
+            }
+            post{
+                success{
+                    echo  "always, success, failure, unstable "
+                    echo "Succes. Las  librerias se descargaron"
+                }
+            }
+        }
+        stage('Compilacion')
+        {
+            steps
+            {
+                script{
+                    echo "Stage B"
+                }
+                retry(5)
+                {
+                    sh '''
+                    
+                    exit 0
+                    
+                    '''
+                }
+                script{
+                   echo "Stage B" 
+                }
+            }
+        }
+        stage('Pruebas')
+        {
+            steps{
+                script
+                {
+                    try 
+                    {
+                        echo 'Running tests...'
+                        sh 'exit 1'   
+                    }   
+                    catch(exc)
+                    {
+                        echo 'Testing failed!'
+                        currentBuild.result = 'UNSTABLE'
+                    }
+                }
+            }
+        }
+    
+        stage('Aproval')
+        {
+        steps {
+            script {
+                    def deploymentDelay = input id: 'Deploy', message: 'Deploy to production?', submitter: 'rkivisto,admin', parameters: [choice(choices: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'], description: 'Hours to delay deployment?', name: 'deploymentDelay')]
+                    sleep time: deploymentDelay.toInteger(), unit: 'HOURS'
+                }
+            }
+        }
+    }
+    post{
+        always 
+        {
+            echo 'This will always run'
+        }
+        success 
+        {
+            echo 'This will run only if successful'
+        }
+        failure {
+            echo 'This will run only if failed'
+        }
+        unstable{
+            echo 'This will run only if unestable'
+        }
+    }
+}

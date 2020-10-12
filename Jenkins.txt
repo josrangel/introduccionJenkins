@@ -1,0 +1,14 @@
+INTEGRACION CONTINUA
+Se unen los codigos de los desarrolladores de manera continua
+
+ENTREGA CONTINUA
+Desplegar el software unido y ver que funcione por los desarrolladores
+
+PRUEBAS CONTINUAS
+Se prueba todo el software, seguridad, bugs, funciones, codigo y si esta bien se manda a despliegue
+
+DESPLIEGUE CONTINUO
+Se lanza a produccion para que el usuario lo utilice y pruebe
+
+OPERACION
+Correr aplicacion y monitorearlo, hacerlo seguro, testing y pruebas
